@@ -1,0 +1,79 @@
+{
+	"components": [
+		{
+			"id": "webhook_1",
+			"provider": "webhook",
+			"config": { "hideForm": true, "mode": "Source", "parameters": {}, "type": "webhook" },
+			"ui": { "position": { "x": 20, "y": 200 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "parse_1",
+			"provider": "parse",
+			"config": {},
+			"input": [{ "lane": "tags", "from": "webhook_1" }],
+			"ui": { "position": { "x": 240, "y": 200 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "ocr_1",
+			"provider": "ocr",
+			"config": {
+				"profile": "${ROCKETRIDE_OCR_PROFILE}",
+				"engine": "easyocr",
+				"script_family": "${ROCKETRIDE_OCR_SCRIPT_FAMILY}",
+				"table_engine": "doctr"
+			},
+			"input": [{ "lane": "image", "from": "parse_1" }],
+			"ui": { "position": { "x": 460, "y": 100 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "anonymize_text_1",
+			"provider": "anonymize_text",
+			"config": { "profile": "glinerMergedLarge" },
+			"input": [
+				{ "lane": "text", "from": "parse_1" },
+				{ "lane": "text", "from": "ocr_1" }
+			],
+			"ui": { "position": { "x": 680, "y": 200 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "preprocessor_langchain_1",
+			"provider": "preprocessor_langchain",
+			"config": {
+				"profile": "default",
+				"default": {
+					"mode": "strlen",
+					"splitter": "RecursiveCharacterTextSplitter",
+					"strlen": 768
+				},
+				"parameters": {}
+			},
+			"input": [{ "lane": "text", "from": "anonymize_text_1" }],
+			"ui": { "position": { "x": 900, "y": 200 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "embedding_transformer_1",
+			"provider": "embedding_transformer",
+			"config": { "profile": "miniLM", "parameters": {} },
+			"input": [{ "lane": "documents", "from": "preprocessor_langchain_1" }],
+			"ui": { "position": { "x": 1120, "y": 200 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "qdrant_1",
+			"provider": "qdrant",
+			"config": {
+				"profile": "local",
+				"local": {
+					"host": "${ROCKETRIDE_QDRANT_HOST}",
+					"port": "${ROCKETRIDE_QDRANT_PORT}",
+					"collection": "${ROCKETRIDE_COLLECTION_NAME}"
+				},
+				"parameters": {}
+			},
+			"input": [{ "lane": "documents", "from": "embedding_transformer_1" }],
+			"ui": { "position": { "x": 1340, "y": 200 }, "measured": { "width": 150, "height": 135 } }
+		}
+	],
+	"project_id": "fcdb4503-8447-4f5a-a537-324c4e2b9ff0",
+	"viewport": { "x": 0, "y": 0, "zoom": 0.7 },
+	"version": 1
+}

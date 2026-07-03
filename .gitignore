@@ -1,0 +1,18 @@
+.rocketride/
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+uploads/
+
+# Editor/tooling config -- not part of the shipped project
+.claude/
+.github/
+.vscode/
+
+# Pre-interview-challenge planning docs -- not part of the project itself
+CHALLENGE_PLAN.md
+PR_DESCRIPTIONS.md
+DEVTO_POST_DRAFT.md
+

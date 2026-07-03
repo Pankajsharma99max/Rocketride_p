@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Document Intelligence Assistant</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">DI</span>
+        <div class="brand-text">
+          <span class="brand-name">Document Intelligence Assistant</span>
+          <span class="brand-sub">RTI &amp; government, financial, and research documents — plain-language answers, grounded in your files</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" id="settings-btn" class="icon-btn" aria-label="Open settings" title="Settings">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        </button>
+        <button type="button" id="theme-toggle" class="icon-btn" aria-label="Switch to dark mode" title="Switch appearance">
+          <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
+          <svg class="icon icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.4 14.7A8.5 8.5 0 1 1 9.3 3.6a7 7 0 0 0 11.1 11.1Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="sidebar">
+      <section class="upload-zone" id="drop-zone">
+        <input type="file" id="file-input" accept=".pdf,.txt,.png,.jpg,.jpeg" hidden />
+        <div class="upload-zone-inner">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+          <p class="upload-title">Drop a document</p>
+          <p class="upload-hint">or <button type="button" id="browse-btn" class="link-btn">browse files</button></p>
+        </div>
+        <div class="upload-progress" id="upload-progress" hidden>
+          <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-label" id="progress-label">Uploading…</span>
+        </div>
+      </section>
+
+      <div class="field-group category-select">
+        <label for="upload-category">Document type</label>
+        <select id="upload-category"></select>
+      </div>
+
+      <section class="library">
+        <h2 class="library-title">Library</h2>
+        <ul class="library-list" id="library-list">
+          <li class="library-empty">Nothing indexed yet</li>
+        </ul>
+      </section>
+    </aside>
+
+    <main class="chat">
+      <div class="chat-toolbar">
+        <div class="field-group focus-select">
+          <label for="focus-category">Answering as</label>
+          <select id="focus-category"></select>
+        </div>
+        <div class="quick-actions" id="quick-actions"></div>
+      </div>
+
+      <div class="chat-scroll" id="chat-log">
+        <div class="empty-state" id="empty-state">
+          <h1>Ask about your documents</h1>
+          <p>Upload an RTI reply, government form, financial statement, or research paper on the left, then ask in plain language.</p>
+          <div class="suggestions" id="suggestions">
+            <button type="button" class="chip">What documents are required?</button>
+            <button type="button" class="chip">Summarize this in simple terms</button>
+            <button type="button" class="chip">What's the deadline mentioned here?</button>
+          </div>
+        </div>
+      </div>
+
+      <form class="composer" id="chat-form">
+        <button type="button" id="clear-chat" class="icon-btn small ghost" aria-label="Clear conversation" title="Clear conversation" hidden>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/></svg>
+        </button>
+        <button type="button" id="export-chat" class="icon-btn small ghost" aria-label="Export conversation" title="Export conversation" hidden>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M12 15l-4-4M12 15l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        </button>
+        <input type="text" id="question-input" placeholder="Ask a question…" autocomplete="off" required />
+        <button type="submit" class="send-btn" aria-label="Ask">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </form>
+    </main>
+  </div>
+
+  <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+</div>
+
+<div class="modal-overlay" id="settings-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-header">
+      <h2 id="settings-title">Settings</h2>
+      <button type="button" id="settings-close" class="icon-btn small ghost" aria-label="Close settings">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="field-group">
+        <label for="setting-rocketride-uri">RocketRide server URL</label>
+        <input type="text" id="setting-rocketride-uri" placeholder="http://localhost:5565" />
+      </div>
+
+      <div class="field-group">
+        <label for="setting-rocketride-key">RocketRide API key</label>
+        <div class="key-input-row">
+          <input type="password" id="setting-rocketride-key" placeholder="MYAPIKEY (local dev default)" autocomplete="off" />
+          <button type="button" class="text-btn danger" data-clear-field="rocketride_apikey">Remove</button>
+        </div>
+        <span class="field-hint" id="hint-rocketride-apikey"></span>
+        <span class="field-hint">Self-hosted RocketRide has no signup portal — this is a shared secret you set to match your server. Local dev servers default to <code>MYAPIKEY</code>.</span>
+      </div>
+
+      <div class="field-group">
+        <label for="setting-gemini-key">Gemini API key</label>
+        <div class="key-input-row">
+          <input type="password" id="setting-gemini-key" placeholder="Not set" autocomplete="off" />
+          <button type="button" class="text-btn danger" data-clear-field="gemini_apikey">Remove</button>
+        </div>
+        <span class="field-hint" id="hint-gemini-apikey"></span>
+        <a class="field-link" href="https://aistudio.google.com" target="_blank" rel="noopener">Get a free key at aistudio.google.com</a>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label for="setting-ocr-language">Document language (OCR)</label>
+          <select id="setting-ocr-language">
+            <option value="latin">English</option>
+            <option value="devanagari">Hindi (Devanagari)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="setting-voice">Read-aloud voice</label>
+          <select id="setting-voice">
+            <option value="af_heart">English — af_heart</option>
+            <option value="am_adam">English — am_adam</option>
+            <option value="hf_alpha">Hindi — hf_alpha</option>
+            <option value="hf_beta">Hindi — hf_beta</option>
+            <option value="hm_omega">Hindi — hm_omega</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <span class="modal-status" id="settings-status"></span>
+      <button type="button" id="settings-save" class="save-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<audio id="answer-audio" hidden></audio>
+<script src="app.js"></script>
+</body>
+</html>

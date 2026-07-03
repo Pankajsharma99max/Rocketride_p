@@ -1,0 +1,102 @@
+{
+	"components": [
+		{
+			"id": "chat_1",
+			"provider": "chat",
+			"config": { "hideForm": true, "mode": "Source", "parameters": {}, "type": "chat" },
+			"ui": { "position": { "x": 20, "y": 200 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "embedding_transformer_1",
+			"provider": "embedding_transformer",
+			"config": { "profile": "miniLM", "parameters": {} },
+			"input": [{ "lane": "questions", "from": "chat_1" }],
+			"ui": { "position": { "x": 240, "y": 200 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "qdrant_1",
+			"provider": "qdrant",
+			"config": {
+				"profile": "local",
+				"local": {
+					"host": "${ROCKETRIDE_QDRANT_HOST}",
+					"port": "${ROCKETRIDE_QDRANT_PORT}",
+					"collection": "${ROCKETRIDE_COLLECTION_NAME}",
+					"score": 0.55
+				},
+				"parameters": {}
+			},
+			"input": [{ "lane": "questions", "from": "embedding_transformer_1" }],
+			"ui": { "position": { "x": 460, "y": 200 }, "measured": { "width": 150, "height": 135 } }
+		},
+		{
+			"id": "response_documents_1",
+			"provider": "response_documents",
+			"config": { "laneName": "sources" },
+			"input": [{ "lane": "documents", "from": "qdrant_1" }],
+			"ui": { "position": { "x": 680, "y": 40 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "prompt_1",
+			"provider": "prompt",
+			"config": {
+				"instructions": [
+					"You are a document-assistance AI covering RTI/government paperwork, financial statements, research papers, and general documents.",
+					"Answer strictly using the provided document context. Quote the relevant section, clause, figure, or passage when possible.",
+					"If the answer isn't in the provided context, say so plainly instead of guessing.",
+					"Keep answers direct and in the same language the question was asked in.",
+					"Follow any additional domain-specific instructions attached to the question (e.g. plain-language framing for government documents, numeric precision for financial documents, academic tone for research documents)."
+				],
+				"parameters": {}
+			},
+			"input": [
+				{ "lane": "documents", "from": "qdrant_1" },
+				{ "lane": "questions", "from": "qdrant_1" }
+			],
+			"ui": { "position": { "x": 680, "y": 200 }, "measured": { "width": 150, "height": 86 } }
+		},
+		{
+			"id": "llm_gemini_1",
+			"provider": "llm_gemini",
+			"config": {
+				"profile": "custom",
+				"custom": {
+					"apikey": "${ROCKETRIDE_GEMINI_KEY}",
+					"model": "gemini-2.5-flash",
+					"modelTotalTokens": 32768,
+					"outputTokens": 8192
+				},
+				"parameters": {}
+			},
+			"input": [{ "lane": "questions", "from": "prompt_1" }],
+			"ui": { "position": { "x": 900, "y": 200 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "response_answers_1",
+			"provider": "response_answers",
+			"config": { "laneName": "answers" },
+			"input": [{ "lane": "answers", "from": "llm_gemini_1" }],
+			"ui": { "position": { "x": 1120, "y": 120 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "audio_tts_1",
+			"provider": "audio_tts",
+			"config": {
+				"profile": "kokoro",
+				"kokoro": { "kokoro_voice": "${ROCKETRIDE_TTS_VOICE}" }
+			},
+			"input": [{ "lane": "answers", "from": "llm_gemini_1" }],
+			"ui": { "position": { "x": 1120, "y": 280 }, "measured": { "width": 150, "height": 66 } }
+		},
+		{
+			"id": "response_audio_1",
+			"provider": "response_audio",
+			"config": { "laneName": "audio" },
+			"input": [{ "lane": "audio", "from": "audio_tts_1" }],
+			"ui": { "position": { "x": 1340, "y": 280 }, "measured": { "width": 150, "height": 66 } }
+		}
+	],
+	"project_id": "a63c30ae-acfe-4971-bd07-872c043a408c",
+	"viewport": { "x": 0, "y": 0, "zoom": 0.7 },
+	"version": 1
+}

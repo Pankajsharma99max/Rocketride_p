@@ -5,6 +5,11 @@ __pycache__/
 .venv/
 venv/
 uploads/
+contact_messages.jsonl
+
+# Frontend build tooling/output -- built via `cd frontend && npm install && npm run build`
+frontend/node_modules/
+frontend/dist/
 
 # Editor/tooling config -- not part of the shipped project
 .claude/

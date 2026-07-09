@@ -23,6 +23,7 @@ static `prompt` node both see as part of the question -- see `_build_question()`
 
 import asyncio
 import base64
+import json
 import logging
 import os
 import threading
@@ -44,7 +45,8 @@ APP_ROOT = Path(__file__).parent
 UPLOAD_DIR = APP_ROOT / 'uploads'
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-app = Flask(__name__, static_folder='static', static_url_path='')
+FRONTEND_DIST = APP_ROOT / 'frontend' / 'dist'
+app = Flask(__name__, static_folder=str(FRONTEND_DIST), static_url_path='')
 
 # ── Background event loop (bridges sync Flask routes to the async SDK) ─────
 _loop = asyncio.new_event_loop()
@@ -308,7 +310,12 @@ def _build_question(text: str, category: str, action: str, history: list) -> Que
 
 @app.route('/')
 def index():
-    return send_from_directory('static', 'index.html')
+    if not (FRONTEND_DIST / 'index.html').exists():
+        return (
+            "Frontend not built yet. Run 'npm install && npm run build' inside frontend/, then restart app.py.",
+            503,
+        )
+    return send_from_directory(FRONTEND_DIST, 'index.html')
 
 
 @app.route('/health')
@@ -390,6 +397,36 @@ def categories():
             'quick_actions': [{'id': k, 'label': v['label']} for k, v in QUICK_ACTIONS.items()],
         }
     )
+
+
+CONTACT_LOG = APP_ROOT / 'contact_messages.jsonl'
+
+
+@app.route('/api/contact', methods=['POST'])
+def contact():
+    """Store a landing-page contact message.
+
+    This does not send an email -- there's no SMTP/mail service configured.
+    Messages are appended to a local, gitignored JSONL file so nothing is
+    lost between requests; wire up a real mail provider here if this app is
+    ever deployed somewhere someone needs to actually be notified.
+    """
+    data = request.get_json(force=True, silent=True) or {}
+    name = (data.get('name') or '').strip()
+    email = (data.get('email') or '').strip()
+    message = (data.get('message') or '').strip()
+
+    if not name or not email or not message:
+        return jsonify(error='Name, email, and message are all required.'), 400
+    if '@' not in email or '.' not in email.split('@')[-1]:
+        return jsonify(error='That email address doesn\'t look right.'), 400
+
+    entry = {'name': name, 'email': email, 'message': message, 'submitted_at': time.time()}
+    with open(CONTACT_LOG, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+
+    logger.info('Contact message received from %s <%s>', name, email)
+    return jsonify({'status': 'ok'})
 
 
 @app.route('/api/settings', methods=['GET'])

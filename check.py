@@ -1,5 +1,5 @@
 """
-Setup checker for the RTI Document Assistant RocketRide project.
+Setup checker for Docket (Document Intelligence Assistant, built on RocketRide).
 
 Run this before `python app.py` to catch configuration problems early:
 
@@ -110,13 +110,23 @@ def check_flask_installed() -> bool:
         return False
 
 
+def check_frontend_built() -> bool:
+    index_html = APP_ROOT / 'frontend' / 'dist' / 'index.html'
+    if not index_html.exists():
+        print(f'FAIL: {index_html} not found. Run: cd frontend && npm install && npm run build')
+        return False
+    print('OK: frontend is built (frontend/dist/index.html present).')
+    return True
+
+
 def main() -> int:
-    print('RTI Document Assistant -- setup check\n' + '-' * 40)
+    print('Docket -- setup check\n' + '-' * 40)
     checks = [
         check_sdk_installed(),
         check_flask_installed(),
         check_env_file(),
         check_pipeline_files(),
+        check_frontend_built(),
     ]
     print('-' * 40)
     if all(checks):

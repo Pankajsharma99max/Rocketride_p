@@ -10,10 +10,10 @@ Docket's mark is a document with a folded corner and a checkmark — a page you 
 |---|---|
 | ![Landing page](docs/screenshots/landing-hero.png) | ![App workspace](docs/screenshots/app-workspace.png) |
 | Landing page — dark hero, interactive 3D scene, feature overview | App workspace — upload, library, focus selector, quick actions |
-| ![RocketRide pipeline design](docs/screenshots/rocketride-pipeline-design.png) | ![RocketRide pipeline status](docs/screenshots/rocketride-pipeline-status.png) |
-| `ingestion.pipe` in the RocketRide VS Code extension's visual editor | The same pipeline running, with live status and performance metrics |
 
-*(Image files live in `docs/screenshots/` — see that folder if any of the four above aren't rendering.)*
+The pipelines behind this app, viewed in the RocketRide VS Code extension (see [`docs/screenshots/`](docs/screenshots/) for how to add these):
+- `ingestion.pipe` in the visual pipeline editor
+- The same pipeline running, with live status and performance metrics
 
 ## What it does
 

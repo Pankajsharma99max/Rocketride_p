@@ -1,19 +1,73 @@
+<div align="center">
+
 # Docket
 
-> Upload an RTI reply, government form, financial statement, or research paper — then ask questions about it in plain language, with an optional spoken answer for accessibility. Built on [RocketRide](https://rocketride.org), the open-source AI pipeline engine.
+**Ask a document anything. Get an answer you can trust, with the source cited.**
+
+Upload an RTI reply, government form, financial statement, or research paper — then ask questions about it in plain language, with an optional spoken answer for accessibility.
+
+Built on [RocketRide](https://rocketride.org), the open-source AI pipeline engine.
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Frontend](https://img.shields.io/badge/frontend-React%2019%20%2B%20Vite-61dafb.svg)](frontend)
+[![Backend](https://img.shields.io/badge/backend-Flask-black.svg)](app.py)
+[![Motion](https://img.shields.io/badge/motion-Framer%20Motion-e535ab.svg)](https://motion.dev)
+[![Powered by](https://img.shields.io/badge/powered%20by-RocketRide-0071e3.svg)](https://rocketride.org)
+
+</div>
 
 Docket's mark is a document with a folded corner and a checkmark — a page you can trust the answer from.
 
+---
+
+## Contents
+
+- [Screenshots](#screenshots)
+- [What it does](#what-it-does)
+- [Who it's for, and how it adapts](#who-its-for-and-how-it-adapts)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Setup](#setup)
+- [Project structure](#project-structure)
+- [API reference](#api-reference-flask-backend)
+- [Notes on the pipelines](#notes-on-the-pipelines)
+- [Ideas for further extension](#ideas-for-further-extension)
+
+---
+
 ## Screenshots
 
-| | |
-|---|---|
-| ![Landing page](docs/screenshots/landing-hero.png) | ![App workspace](docs/screenshots/app-workspace.png) |
-| Landing page — dark hero, interactive 3D scene, feature overview | App workspace — upload, library, focus selector, quick actions |
+### The app
 
-The pipelines behind this app, viewed in the RocketRide VS Code extension (see [`docs/screenshots/`](docs/screenshots/) for how to add these):
-- `ingestion.pipe` in the visual pipeline editor
-- The same pipeline running, with live status and performance metrics
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/landing-hero.png" alt="Landing page"></td>
+<td width="50%"><img src="docs/screenshots/app-workspace.png" alt="App workspace"></td>
+</tr>
+<tr>
+<td align="center"><sub>Landing page — dark hero, interactive 3D scene, feature overview</sub></td>
+<td align="center"><sub>App workspace — upload, library, focus selector, quick actions</sub></td>
+</tr>
+</table>
+
+### The pipelines behind it
+
+Both `.pipe` files below, viewed and running in the RocketRide VS Code extension:
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/rocketride-pipeline-design.png" alt="RocketRide pipeline design view"></td>
+<td width="50%"><img src="docs/screenshots/rocketride-pipeline-status.png" alt="RocketRide pipeline status view"></td>
+</tr>
+<tr>
+<td align="center"><sub><code>ingestion.pipe</code> in the visual pipeline editor</sub></td>
+<td align="center"><sub>The same pipeline running, with live status and performance metrics</sub></td>
+</tr>
+</table>
+
+*(If either pipeline image above isn't rendering, add it to `docs/screenshots/` with the filename shown in the `alt` text — see [`docs/screenshots/README.md`](docs/screenshots/README.md).)*
+
+---
 
 ## What it does
 
@@ -72,6 +126,8 @@ Saving/removing always persists to `.env` first, then attempts to reconnect so t
 
 **Where does the RocketRide API key come from?** Unlike the Gemini key, there's no signup portal — it's a shared secret you set yourself, matching what your RocketRide server is configured with. A local dev server (`docker compose up`, per [rocketride-server](https://github.com/rocketride-org/rocketride-server)) ships with a built-in default: **`MYAPIKEY`**. If you're pointed at someone else's on-prem/production server, ask them for the key they configured.
 
+---
+
 ## Architecture
 
 Two RocketRide pipelines (`.pipe` files, portable JSON, importable in the RocketRide VS Code extension), a Flask backend, and a React frontend:
@@ -123,6 +179,8 @@ chat → embedding_transformer → qdrant (search) → prompt (baseline groundin
 
 The alternative — a separate pipeline (or a differently-configured `prompt` node) per document type — would mean restarting/re-selecting a pipeline every time someone changes their answering focus, which conflicts with RocketRide's own "start once, reuse many times" guidance (`ROCKETRIDE_COMMON_MISTAKES.md`, "Starting Pipeline for Every Request") and would make focus-switching feel slow. Per-request instructions get the same effect with one long-lived pipeline.
 
+---
+
 ## Setup
 
 1. **Install RocketRide** (server + Qdrant) per [rocketride-org/rocketride-server](https://github.com/rocketride-org/rocketride-server), or point `.env` at an existing instance.
@@ -166,6 +224,8 @@ cd frontend && npm run dev
 ```
 
 `frontend/vite.config.js` proxies `/api` and `/health` to `http://localhost:5000`, so open `http://localhost:5173` during development. Run `npm run build` again before relying on `python app.py` alone (it serves the built `frontend/dist/`, not the dev server).
+
+---
 
 ## Project structure
 
@@ -212,6 +272,8 @@ cd frontend && npm run dev
 - The `llm_gemini` node uses the `custom` profile (explicit `model`/`modelTotalTokens`/`outputTokens`/`apikey`) rather than a pinned profile name, so the model is easy to swap without hunting for RocketRide's internal profile-key naming.
 - All documents share one Qdrant collection (`ROCKETRIDE_COLLECTION_NAME`) regardless of document type — "document type" and "focus" are answer-framing metadata, not data isolation. If you need hard separation between, say, a client's financial records and someone else's research papers, use separate `ROCKETRIDE_COLLECTION_NAME` values (and separate app instances/`.env` files).
 
+---
+
 ## Ideas for further extension
 
 Not built here, but natural next steps if you want to take this further:
@@ -219,6 +281,8 @@ Not built here, but natural next steps if you want to take this further:
 - **Table-aware financial extraction** — `parse` already emits a `table` lane; a dedicated table-to-text/structured branch would preserve financial statement table structure instead of flattening it into plain text.
 - **Structured extraction endpoint** using RocketRide's `extract_data` node (LLM-backed structured field extraction) for a "pull every figure into a spreadsheet" style feature, rather than the current free-text "Key figures & dates" quick action.
 - **Per-document isolation** (answer only from one selected document rather than the whole shared library) via a `parent`/`objectId` metadata filter on the `qdrant` search node.
+
+---
 
 ## License
 
